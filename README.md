@@ -49,12 +49,15 @@ Restart Jenkins once plugins are installed
 
 
 ### Configure Agent
-$aws configure
-access key:
-secret access key:
-region:
-
-$aws s3 ls
+```
+aws configure
+```
+* access key:
+* secret access key:
+* region:
+```
+aws s3 ls
+```
 
 ### Configure Jenkins Shared Libraries in Jenkins master:
 * Go to Manage Jenkins -> System
@@ -234,8 +237,8 @@ kubectl get pods
 
  # Some important points:
 * Create a feature branch and switch to it.
-git branch feature-1 -> creating branch and staying in main branch
-git checkout -b feature-1 --> creating branch and switching into feature-1
+* git branch feature-1 -> creating branch and staying in main branch
+* git checkout -b feature-1 --> creating branch and switching into feature-1
 
 * Note: In Jenkins CICD, for CI pipeline we will use multibranch pipeline and it has BRANCH_NAME variable exited. Similarly, For CD pipeline, We will use multi-branch pipeline project.  Here running only non-prod branches, called continuous deployment. For prod, need to approvals, called delivery.
 
