@@ -1,5 +1,4 @@
 # How to delete unnecessary files: 
-
 ```
 for d in 00-vpc/ 10-sg/ 20-db/ 30-bastion/ 40-eks/ 50-acm/ 60-ingress-alb/ 70-ecr/ ; do
   echo "Removing from $d:"
@@ -46,24 +45,24 @@ Plugins:
 
 Restart Jenkins once plugins are installed
 
-### Manage Credentials:
-* We need to add ssh credentials for Jenkins to connect to agent. I am using ID as ssh-auth
-* We need to add aws credentials for Jenkins to connect with AWS for deployments. I am using
-    * aws-creds-dev
-    * aws-creds-prod
-    * aws-creds
+* Note: Jenkins Agent is used to run application and all services. Bastion server is used to troubleshoot or test entire application or database.
+
 
 ### Configure Agent
+$aws configure
+access key:
+secret access key:
+region:
 
-### Configure Jenkins Shared Libraries
+$aws s3 ls
+
+### Configure Jenkins Shared Libraries in Jenkins master:
 * Go to Manage Jenkins -> System
 * Find Global Trusted Pipeline Libraries section
 * Name as jenkins-shared-library, default version main and load implicitly
-* Location is https://github.com/Lingaiahthammisetti/9.26.jenkins-shared-library-expense.git
+* Location is https://github.com/rajalingarao/9.26.jenkins-shared-library-expense.git
 
 Now Jenkins is ready to use.
-
-
 
 
 # Infrastructure
@@ -119,7 +118,7 @@ kubectl create namespace expense
 mysql -h db-dev.lithesh.shop -u root -pExpenseApp1
 ```
 
-We are creating schema while creating RDS. But table should be created.
+We are creating schema while creating RDS. But table should be created here.
 Refer backend.sql to create
 Table
 User
@@ -222,10 +221,63 @@ kubens expense
 kubectl get pods
 ```
 
-* Please run the 'aws configure' on jenkins-agent on ec2-user.
-    $aws configure
+* Important Point: 
+    * we have created a branch bk-feature-1 for non-prod in backend, There are two branches mainly prod and non-prod. 
+     * 1. main, 
+     * 2. bk-feature-1,
+     * 3. bk-feature-2 branches.
 
-* Trouble shooting the Mysql Database:
+    * we have created a branch fk-feature-1 for non-prod in frontend, There are two branches mainly prod and non-prod. 
+     * 1. main, 
+     * 2. fk-feature-1,
+     * 3. fk-feature-2 branches.
+
+ # Some important points:
+* Create a feature branch and switch to it.
+git branch feature-1 -> creating branch and staying in main branch
+git checkout -b feature-1 --> creating branch and switching into feature-1
+
+* Note: In Jenkins CICD, for CI pipeline we will use multibranch pipeline and it has BRANCH_NAME variable exited. Similarly, For CD pipeline, We will use multi-branch pipeline project.  Here running only non-prod branches, called continuous deployment. For prod, need to approvals, called delivery.
+
+* Note: I have faced version 1.8.0. feature-1 already existed in remote repository. You always push changes into main branch, it is the issue. You should push changes into feature-1, feature-2, feature-3.
+
+# Creating Multi branches in backend. main points to Prod, we run it non-prod on 'feature branches'
+```
+git clone https://github.com/rajalingarao/9.27.backend-shared-library-multi-branch-pipeline.git
+```
+```
+cd 9.27.backend-shared-library-multi-branch-pipeline
+```
+
+* Create and Switch to the New Branch (recommended):
+```
+backend-rep$ git checkout -b feature-100
+```
+* Push changes into new branch feature-100
+```
+backend-rep$ git add .;git commit -m "k8s backend shared library"; git push -u origin feature-100;
+```
+# Creating Multi branches in frontend. main points to Prod, we run it non-prod on 'feature branches'.
+
+```
+git clone https://github.com/rajalingarao/https://github.com/rajalingarao/9.28.frontend-shared-library-multi-branch-pipeline.git
+```
+```
+cd 9.28.frontend-shared-library-multi-branch-pipeline
+```
+
+* Create and Switch to the New Branch (recommended):
+```
+frontend-rep$ git checkout -b feature-121
+```
+* Push changes into new branch feature-121
+```
+frontend-rep$ git add .;git commit -m "k8s backend shared library"; git push -u origin feature-121;
+```
+
+
+
+# After running the entire applications, if running, then trouble shooting the Mysql Database:
 
 * Connect to RDS using bastion host.
 ```
@@ -238,24 +290,8 @@ USE transactions;
 ```
 select * from transactions;
 ```
-* Note: 
-    * we have created a branch backend-feature-10 in backend, There are two branches 1. main, 2. backend-feature-10.
-    * we have created a branch frontend-feature-10 in frontend, There are two branches 1. main, 2. frontend-feature-20.
 
- 9.27.backend-shared-library
-* Create a feature branch and switch to it.
-git branch feature-100
-git checkout -b feature-100
 
-* Note: In Jenkins CICD, for CI pipeline we will use multibranch pipeline and it has BRANCH_NAME variable exited. For CD pipeline, We will use pipeline project.
-
-* Note: I have faced version 1.8.0. feature-1 already existed in remote repository. You always push changes into main branch, it is the issue. You should push changes into feature-1, feature-2, feature-3.
-
-* Create and Switch to the New Branch (recommended):
-git checkout -b feature-100
-
-* Push changes into new branch feature-100
-git add .;git commit -m "k8s backend shared library"; git push -u origin feature-100;
 
 
 * Resource delete steps
